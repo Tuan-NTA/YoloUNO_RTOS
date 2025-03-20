@@ -1,4 +1,3 @@
-
 #include <WiFi.h>
 #include <Arduino_MQTT_Client.h>
 #include <esp_log.h>
@@ -11,11 +10,11 @@
 #include "DHT20.h"
 
 #define PUMP_PIN 0 // Replace 0 with the actual pin number for D3
-
+#define LED_PIN 6
 DHT20 dht20;
 
-constexpr char CURRENT_FIRMWARE_TITLE[] = "BLINK";
-constexpr char CURRENT_FIRMWARE_VERSION[] = "0";
+constexpr char CURRENT_FIRMWARE_TITLE[] = "BLINKY"; // Title firmware
+constexpr char CURRENT_FIRMWARE_VERSION[] = "1.0"; // Version firmware
 
 // Maximum amount of retries we attempt to download each firmware chunck over MQTT
 constexpr uint8_t FIRMWARE_FAILURE_RETRIES = 12U;
@@ -24,12 +23,12 @@ constexpr uint8_t FIRMWARE_FAILURE_RETRIES = 12U;
 // increased packet size, might increase download speed
 constexpr uint16_t FIRMWARE_PACKET_SIZE = 4096U;
 
-constexpr char WIFI_SSID[] = "Toi Hong Biet";
-constexpr char WIFI_PASSWORD[] = "lethihue";
+constexpr char WIFI_SSID[] = "vantien";
+constexpr char WIFI_PASSWORD[] = "12341234";
 
 // See https://thingsboard.io/docs/getting-started-guides/helloworld/
 // to understand how to obtain an access token
-constexpr char TOKEN[] = "vTKvftl7Vt5fydI76ILU";
+constexpr char TOKEN[] = "o0mfe52338ha95qu7il8"; // Your deivce Access Token
 // Thingsboard we want to establish a connection too
 constexpr char THINGSBOARD_SERVER[] = "app.coreiot.io";
 
@@ -45,7 +44,7 @@ constexpr uint16_t MAX_MESSAGE_RECEIVE_SIZE = 512U;
 
 constexpr uint32_t SERIAL_DEBUG_BAUD = 115200U;
 constexpr int16_t TELEMETRY_SEND_INTERVAL = 5000U;
-
+constexpr int16_t BLINKY_SEND_INTERVAL = 1000U;
 constexpr size_t MAX_ATTRIBUTES = 6U;
 
 uint32_t previousTelemetrySend;
@@ -105,42 +104,23 @@ bool reconnect()
   return true;
 }
 
-void processSharedAttributeUpdate(const JsonObjectConst &data)
-{
-  Serial.print("Received data from shared attributes: ");
-  Serial.print(data);
-  for (auto it = data.begin(); it != data.end(); ++it)
-  {
-    ESP_LOGI("MAIN", "Key: %s, Value: %s", it->key().c_str(), it->value().as<const char *>());
-  }
-
-  const size_t jsonSize = Helper::Measure_Json(data);
-  char buffer[jsonSize];
-  serializeJson(data, buffer, jsonSize);
-  ESP_LOGI("MAIN", "%s", buffer);
-
-  // Kiểm tra nếu có key "fw_version" trong dữ liệu shared attributes
-  if (data.containsKey("fw_version"))
-  {
-    ESP_LOGI("MAIN", "Firmware version changed, updating currentFWSent to true");
-    currentFWSent = true;
-  }
-}
-
 void processSetLedState(const JsonVariantConst &data, JsonDocument &response)
 {
-  // Process data
-  ledState = data;
-  Serial.print("Received set led state RPC. New state: ");
-  Serial.println(ledState);
+  // Process data (Comment and Uncomment to test OTA)
 
-  StaticJsonDocument<1> response_doc;
-  // Returning current state as response
-  response_doc["newState"] = (int)ledState;
-  response.set(response_doc);
+  // ledState = data;
+  // Serial.print("Received set led state RPC. New state: ");
+  // Serial.println(ledState);
 
-  ledStateChanged = true;
+  // StaticJsonDocument<1> response_doc;
+  // // Returning current state as response
+  // response_doc["newState"] = (int)ledState;
+  // response.set(response_doc);
+
+  // ledStateChanged = true;
 }
+
+
 
 void processSetPumpState(const JsonVariantConst &data, JsonDocument &response)
 {
@@ -187,6 +167,7 @@ void setup()
 {
   // Initalize serial connection for debugging
   Serial.begin(SERIAL_DEBUG_BAUD);
+  pinMode(LED_PIN,OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   delay(1000);
   InitWiFi();
@@ -204,21 +185,22 @@ void loop()
   if (!tb.connected())
   {
     Serial.printf("Connecting to: (%s) with token (%s)\n", THINGSBOARD_SERVER, TOKEN);
-    if (!tb.connect(THINGSBOARD_SERVER, TOKEN, THINGSBOARD_PORT, "DEVICEUPDATE", nullptr))
+    if (!tb.connect(THINGSBOARD_SERVER, TOKEN, THINGSBOARD_PORT, "  ", nullptr))
     {
       Serial.println("Failed to connect");
       return;
     }
 
-    if (!subscribed)
-    {
-      // Shared attributes we want to request from the server
-      constexpr std::array<const char *, MAX_ATTRIBUTES> SUBSCRIBED_SHARED_ATTRIBUTES = {FW_CHKS_KEY, FW_CHKS_ALGO_KEY, FW_SIZE_KEY, FW_TAG_KEY, FW_TITLE_KEY, FW_VER_KEY};
-      const Shared_Attribute_Callback<MAX_ATTRIBUTES> callback(&processSharedAttributeUpdate, SUBSCRIBED_SHARED_ATTRIBUTES);
-      subscribed = shared_update.Shared_Attributes_Subscribe(callback);
-      Serial.print("Subscribed for shared attributes: ");
-      Serial.println(subscribed);
-    }
+    // Shared attribute conflig with OTA don't uncomment
+    // if (!subscribed)
+    // {
+    //   // Shared attributes we want to request from the server
+    //   constexpr std::array<const char *, MAX_ATTRIBUTES> SUBSCRIBED_SHARED_ATTRIBUTES = {FW_CHKS_KEY, FW_CHKS_ALGO_KEY, FW_SIZE_KEY, FW_TAG_KEY, FW_TITLE_KEY, FW_VER_KEY};
+    //   const Shared_Attribute_Callback<MAX_ATTRIBUTES> callback(&processSharedAttributeUpdate, SUBSCRIBED_SHARED_ATTRIBUTES);
+    //   subscribed = shared_update.Shared_Attributes_Subscribe(callback);
+    //   Serial.print("Subscribed for shared attributes: ");
+    //   Serial.println(subscribed);
+    // }
 
     Serial.println("Subscribing for RPC...");
 
@@ -264,7 +246,6 @@ void loop()
     digitalWrite(LED_BUILTIN, ledState);
     Serial.print("LED state is set to: ");
     Serial.println(ledState);
-
     tb.sendAttributeData(LED_STATE_ATTR, ledState);
   }
 
@@ -277,7 +258,6 @@ void loop()
 
     // TODO
     digitalWrite(PUMP_PIN, pumpState);
-
     tb.sendAttributeData(PUMP_STATE_ATTR, pumpState);
   }
 
@@ -289,8 +269,10 @@ void loop()
   if (!updateRequestSent)
   {
     Serial.println("Firwmare Update...");
-    const OTA_Update_Callback callback(CURRENT_FIRMWARE_TITLE, CURRENT_FIRMWARE_VERSION, &updater, &finished_callback, &progress_callback, &update_starting_callback, FIRMWARE_FAILURE_RETRIES, FIRMWARE_PACKET_SIZE);
-    updateRequestSent = ota.Start_Firmware_Update(callback);
+    const OTA_Update_Callback callback(CURRENT_FIRMWARE_TITLE,CURRENT_FIRMWARE_VERSION, 
+    &updater, &finished_callback, &progress_callback, &update_starting_callback, FIRMWARE_FAILURE_RETRIES, FIRMWARE_PACKET_SIZE);
+
+    updateRequestSent = ota.Subscribe_Firmware_Update(callback);
   }
 
   tb.loop();
