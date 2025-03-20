@@ -8,6 +8,7 @@
 #include "DHT20.h"
 #include "Wire.h"
 #include <ArduinoOTA.h>
+#include "scheduler.h"
 
 constexpr char WIFI_SSID[] = "abcd";
 constexpr char WIFI_PASSWORD[] = "123456789";
@@ -15,6 +16,8 @@ constexpr char WIFI_PASSWORD[] = "123456789";
 constexpr char TOKEN[] = "7s5pokn2se622pzn1jxu";
 
 constexpr char THINGSBOARD_SERVER[] = "app.coreiot.io";
+constexpr char DEVICE_PROFILE[] = "Temperature Sensor";
+
 constexpr uint16_t THINGSBOARD_PORT = 1883U;
 
 constexpr uint32_t MAX_MESSAGE_SIZE = 1024U;
@@ -107,20 +110,34 @@ const bool reconnect() {
   return true;
 }
 
+void task1(){
+  Serial.println("Hello Task 1");
+}
+
+void task2(){
+  Serial.println("Hello Task 2");
+}
+
 void setup() {
   Serial.begin(SERIAL_DEBUG_BAUD);
   pinMode(LED_PIN, OUTPUT);
   delay(1000);
-  InitWiFi();
+  //InitWiFi();
 
   Wire.begin(SDA_PIN, SCL_PIN);
   dht20.begin();
-  
+  SCH_Init();
+  SCH_Add_Task(task1, 200, 200);
+  SCH_Add_Task(task2, 100, 500);
+
 }
-
 void loop() {
-  delay(10);
+  //delay(10);
+  SCH_Dispatch_Tasks();
+  
 
+
+  /*
   if (!reconnect()) {
     return;
   }
@@ -130,7 +147,7 @@ void loop() {
     Serial.print(THINGSBOARD_SERVER);
     Serial.print(" with token ");
     Serial.println(TOKEN);
-    if (!tb.connect(THINGSBOARD_SERVER, TOKEN, THINGSBOARD_PORT)) {
+    if (!tb.connect(THINGSBOARD_SERVER, TOKEN, THINGSBOARD_PORT, DEVICE_PROFILE)) {
       Serial.println("Failed to connect");
       return;
     }
@@ -197,4 +214,5 @@ void loop() {
   }
 
   tb.loop();
+  */
 }
