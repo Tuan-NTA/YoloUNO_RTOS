@@ -14,7 +14,7 @@
 DHT20 dht20;
 
 constexpr char CURRENT_FIRMWARE_TITLE[] = "BLINKY"; // Title firmware
-constexpr char CURRENT_FIRMWARE_VERSION[] = "1.0"; // Version firmware
+constexpr char CURRENT_FIRMWARE_VERSION[] = "1.1"; // Version firmware
 
 // Maximum amount of retries we attempt to download each firmware chunck over MQTT
 constexpr uint8_t FIRMWARE_FAILURE_RETRIES = 12U;
@@ -108,16 +108,16 @@ void processSetLedState(const JsonVariantConst &data, JsonDocument &response)
 {
   // Process data (Comment and Uncomment to test OTA)
 
-  // ledState = data;
-  // Serial.print("Received set led state RPC. New state: ");
-  // Serial.println(ledState);
+  ledState = data;
+  Serial.print("Received set led state RPC. New state: ");
+  Serial.println(ledState);
 
-  // StaticJsonDocument<1> response_doc;
-  // // Returning current state as response
-  // response_doc["newState"] = (int)ledState;
-  // response.set(response_doc);
+  StaticJsonDocument<1> response_doc;
+  // Returning current state as response
+  response_doc["newState"] = (int)ledState;
+  response.set(response_doc);
 
-  // ledStateChanged = true;
+  ledStateChanged = true;
 }
 
 
@@ -243,7 +243,7 @@ void loop()
   if (ledStateChanged)
   {
     ledStateChanged = false;
-    digitalWrite(LED_BUILTIN, ledState);
+    digitalWrite(LED_PIN, ledState);
     Serial.print("LED state is set to: ");
     Serial.println(ledState);
     tb.sendAttributeData(LED_STATE_ATTR, ledState);
