@@ -7,8 +7,10 @@
 #include "IAPI_Implementation.h"
 #include "vector"
 #include "ThingsBoard.h"
-/*Nếu muốn chỉnh sửa thư viện riêng tránh xung đột các thuộc tính chia sẻ và OTA ---------------> Tham khảo thư viện chính thức OTA_Firmware_Update.h ở .pio/libdeps/yolouno/thingsboard*/
-uint8_t constexpr MAX_USER_SHARED_ATTRIBUTE = 10U; // Thay đổi ở dây nếu bạn muốn dùng nhiều hơn
+/*Nếu muốn chỉnh sửa thư viện riêng tránh xung đột các thuộc tính chia sẻ và OTA 
+-------->  Tham khảo thư viện chính thức OTA_Firmware_Update.h ở .pio/libdeps/yolouno/thingsboard
+ Hoặc tạm thời sử dụng thư viện này*/
+uint8_t constexpr MAX_USER_SHARED_ATTRIBUTE = 10U; // Thay đổi ở dây nếu bạn muốn dùng nhiều thuộc tính chia sẻ hơn
 uint8_t constexpr MAX_FW_TOPIC_SIZE = 33U;
 uint8_t constexpr OTA_ATTRIBUTE_KEYS_AMOUNT = 5U;
 char constexpr NO_FW_REQUEST_RESPONSE[] = "Did not receive requested shared attribute firmware keys. Ensure keys exist and device is connected";

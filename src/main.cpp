@@ -201,7 +201,7 @@ void loop()
     //   Serial.print("Subscribed for shared attributes: ");
     //   Serial.println(subscribed);
     // }
-
+    /*if you want to use shared_attribute , please check MyOtaUpdate/example */
     Serial.println("Subscribing for RPC...");
 
     if (!rpc.RPC_Subscribe(rpcCallbacks.cbegin(), rpcCallbacks.cend()))
