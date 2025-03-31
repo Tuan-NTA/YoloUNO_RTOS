@@ -7,13 +7,16 @@
 #include <Attribute_Request.h>
 #include <Espressif_Updater.h>
 //Shared Attributes Configuration
-constexpr uint8_t MAX_ATTRIBUTES = 2; // 
+constexpr uint8_t MAX_ATTRIBUTES = 2U; //
 constexpr std::array<const char*, MAX_ATTRIBUTES> 
 SHARED_ATTRIBUTES = 
 {
   "POWER",
   "ledState"
 };
+
+constexpr int16_t TELEMETRY_SEND_INTERVAL = 5000U;
+uint32_t previousTelemetrySend; 
 // Firmware title and version used to compare with remote version, to check if an update is needed.
 // Title needs to be the same and version needs to be different --> downgrading is possible
 constexpr char CURRENT_FIRMWARE_TITLE[] = "BLINKY";
@@ -22,12 +25,14 @@ constexpr char CURRENT_FIRMWARE_VERSION[] = "1.1";
 constexpr uint8_t FIRMWARE_FAILURE_RETRIES = 12U;
 // Size of each firmware chunck downloaded over MQTT,
 // increased packet size, might increase download speed
-constexpr uint16_t FIRMWARE_PACKET_SIZE = 32768U;
+constexpr uint16_t FIRMWARE_PACKET_SIZE = 4096U;
 
 constexpr char WIFI_SSID[] = "vantien";
 constexpr char WIFI_PASSWORD[] = "12341234";
 constexpr char TOKEN[] = "o0mfe52338ha95qu7il8";
 constexpr char THINGSBOARD_SERVER[] = "app.coreiot.io";
+constexpr char TEMPERATURE_KEY[] = "temperature";
+constexpr char HUMIDITY_KEY[] = "humidity";
 constexpr uint16_t THINGSBOARD_PORT = 1883U;
 constexpr uint16_t MAX_MESSAGE_SEND_SIZE = 512U;
 constexpr uint16_t MAX_MESSAGE_RECEIVE_SIZE = 512U;
@@ -134,7 +139,8 @@ void loop() {
         Serial.println("Failed to request shared attributes");
       }
     }
-    if (!shared_update_subscribed){
+
+  if (!shared_update_subscribed){
       Serial.println("Subscribing for shared attribute updates...");
       const Shared_Attribute_Callback<MAX_ATTRIBUTES> callback(&processSharedAttributeUpdate, SHARED_ATTRIBUTES);
       if (!shared_update.Shared_Attributes_Subscribe(callback)) {
@@ -144,21 +150,49 @@ void loop() {
       Serial.println("Subscribe done");
       shared_update_subscribed = true;
     }
-    if (!currentFWSent) {
-      currentFWSent = ota.Firmware_Send_Info(CURRENT_FIRMWARE_TITLE, CURRENT_FIRMWARE_VERSION);
+  }  
+  if (!currentFWSent) {
+    currentFWSent = ota.Firmware_Send_Info(CURRENT_FIRMWARE_TITLE, CURRENT_FIRMWARE_VERSION);
+  }
+  if (!updateRequestSent) {
+    Serial.print(CURRENT_FIRMWARE_TITLE);
+    Serial.println(CURRENT_FIRMWARE_VERSION);
+    Serial.println("Firwmare Update ...");
+    const OTA_Update_Callback callback(CURRENT_FIRMWARE_TITLE, CURRENT_FIRMWARE_VERSION, &updater, &finished_callback, &progress_callback, &update_starting_callback, FIRMWARE_FAILURE_RETRIES, FIRMWARE_PACKET_SIZE);
+    updateRequestSent = ota.Start_Firmware_Update(callback);
+    if(updateRequestSent) {
+      delay(500);
+      Serial.println("Firwmare Update Subscription...");
+      updateRequestSent = ota.Subscribe_Firmware_Update(callback);
     }
-    if (!updateRequestSent) {
-      Serial.print(CURRENT_FIRMWARE_TITLE);
-      Serial.println(CURRENT_FIRMWARE_VERSION);
-      Serial.println("Firwmare Update ...");
-      const OTA_Update_Callback callback(CURRENT_FIRMWARE_TITLE, CURRENT_FIRMWARE_VERSION, &updater, &finished_callback, &progress_callback, &update_starting_callback, FIRMWARE_FAILURE_RETRIES, FIRMWARE_PACKET_SIZE);
-      updateRequestSent = ota.Start_Firmware_Update(callback);
-      if(updateRequestSent) {
-        delay(500);
-        Serial.println("Firwmare Update Subscription...");
-        updateRequestSent = ota.Subscribe_Firmware_Update(callback);
-      }
-    }  
+  }
+  // Sending telemetry by time interval
+  if (millis() - previousTelemetrySend > TELEMETRY_SEND_INTERVAL)
+  {
+
+    // Use virtual random sensor
+    float temperature = random(20, 40);
+    float humidity = random(50, 100);
+
+    // Uncomment if using DHT20
+
+    // dht20.read();
+    // temperature = dht20.getTemperature();
+    // humidity = dht20.getHumidity();
+
+    // Uncomment if using DHT11/22
+    /*
+    float temperature = 0;
+    float humidity = 0;
+    dht.read2(&temperature, &humidity, NULL);
+    */
+
+    Serial.println("Sending telemetry. Temperature: " + String(temperature, 1) + " humidity: " + String(humidity, 1));
+
+    tb.sendTelemetryData(TEMPERATURE_KEY, temperature);
+    tb.sendTelemetryData(HUMIDITY_KEY, humidity);
+    tb.sendAttributeData("rssi", WiFi.RSSI()); // also update wifi signal strength
+    previousTelemetrySend = millis();
   }
 tb.loop();
 }
