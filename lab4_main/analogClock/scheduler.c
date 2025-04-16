@@ -33,8 +33,7 @@ hw_timer_t *Timer0_Cfg = NULL;
 
 
 void SCH_Init(void){
-	//TIMER_Init();
-  
+	TIMER_Init();
 }
 
 void SCH_Update(void){

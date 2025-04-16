@@ -13,8 +13,7 @@ void TIMER_ISR(void *pvParameters) {
   }
 }
 
-int led_status1 = 0;
-int led_status2 = 0;
+
 int count_light1 = 1;
 int count_light2 = 6;
 
@@ -27,7 +26,7 @@ void turn_red2()    { digitalWrite(D5, HIGH);digitalWrite(D6, HIGH); }
 void turn_yellow2() { digitalWrite(D5, LOW);digitalWrite(D6, HIGH); }
 void turn_green2()  { digitalWrite(D5, HIGH);digitalWrite(D6, LOW); }
 
-void display_light1() {
+void display_light1() {      
     if (count_light1 <= 5) turn_red1();
     else if (count_light1 <= 8) turn_green1();
     else turn_yellow1();
