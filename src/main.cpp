@@ -1,28 +1,26 @@
 #include <Arduino.h>
+#include <scheduler.h>
+#include <heater.h>
+#include <cooler.h>
+#include <humidifier.h>
+#include <sensor.h>
 
-void TaskLEDControl(void *pvParameters) {
-  pinMode(GPIO_NUM_48, OUTPUT); // Initialize LED pin
-  int ledState = 0;
+void TIMER_ISR(void *pvParameters) {
   while(1) {
-    
-    if (ledState == 0) {
-      digitalWrite(GPIO_NUM_48, HIGH); // Turn ON LED
-    } else {
-      digitalWrite(GPIO_NUM_48, LOW); // Turn OFF LED
-    }
-    ledState = 1 - ledState;
-    vTaskDelay(2000);
+    SCH_Update();
+    vTaskDelay(10);
   }
 }
 
-
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-  xTaskCreate(TaskLEDControl, "LED Control", 2048, NULL, 2, NULL);
+  SCH_Init();
+  SCH_Add_Task(Timer_Run, 0, 1);
+  SCH_Add_Task(task_cooler, 0, 1);
+  SCH_Add_Task(task_heater, 0, 1);
+  SCH_Add_Task(task_humidifier, 0, 1);
+  SCH_Add_Task(printResult, 0, 500);
 }
 
 void loop() {
-  // Serial.println("Hello Custom Board");
-  // delay(1000);
+  SCH_Dispatch_Task();
 }
