@@ -8,9 +8,9 @@ void Set_Timer(int index, int value) {
     timer_flag[index] = 0;
 }
 
-int Is_Timer_Expired() {
-    if (timer_flag[0] == 1) {
-        timer_flag[0] = 0;
+int Is_Timer_Expired(int index) {
+    if (timer_flag[index] == 1) {
+        timer_flag[index] = 0;
         return 1;
     }
     return 0;

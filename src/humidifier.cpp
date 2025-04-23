@@ -28,27 +28,27 @@ void task_humidifier(){
             break;
 
         case active_green:
-            if (Is_Timer_Expired() == 0) 
+            if (Is_Timer_Expired(2) == 0) 
                 break;
-            Set_Timer(0, 500);
+            Set_Timer(2, 500);
             humidifier_status = active_yellow;
             digitalWrite(D7, HIGH);
             digitalWrite(D8,LOW);
             break;
         
         case active_yellow:
-            if (Is_Timer_Expired() == 0) 
+            if (Is_Timer_Expired(2) == 0) 
                 break;
-            Set_Timer(0, 300);
+            Set_Timer(2, 300);
             humidifier_status = active_red;
             digitalWrite(D7, LOW);
             digitalWrite(D8,HIGH);
             break;
         
         case active_red:
-            if (Is_Timer_Expired() == 0) 
+            if (Is_Timer_Expired(2) == 0) 
                 break;
-            Set_Timer(0, 200);
+            Set_Timer(2, 200);
             humidifier_status = idle;
             digitalWrite(D7, HIGH);
             digitalWrite(D8,HIGH);

@@ -18,7 +18,7 @@ void taskLedBlinky(){
             break;
     
         case LED_on:
-            if (Is_Timer_Expired() == 0) 
+            if (Is_Timer_Expired(0) == 0) 
                 break;
             Set_Timer(0, 100);
             led_status = LED_off;
@@ -26,7 +26,7 @@ void taskLedBlinky(){
             break;
     
         case LED_off:
-            if (Is_Timer_Expired() == 0) 
+            if (Is_Timer_Expired(0) == 0) 
                 break;
             Set_Timer(0, 100);
             led_status = LED_on;

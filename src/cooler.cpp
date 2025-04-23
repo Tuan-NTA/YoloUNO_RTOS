@@ -19,10 +19,10 @@ void task_cooler(){
             cooler_status=temp_check;
             break;
         case active:
-            Set_Timer(500);
+            Set_Timer(1,500);
             digitalWrite(D5,HIGH);
             digitalWrite(D6,LOW);
-            if(Is_Timer_Expired == 0){
+            if(Is_Timer_Expired(1) == 0){
                 cooler_status= temp_check;
             }
         case temp_check:
