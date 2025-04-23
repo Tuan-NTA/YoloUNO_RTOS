@@ -10,6 +10,6 @@ extern float temperature;
 extern float humidity;
 
 void readSensor();
-void printResult();
+void printTnH();
 
 #endif

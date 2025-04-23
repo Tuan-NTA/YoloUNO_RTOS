@@ -4,6 +4,7 @@
 #include <cooler.h>
 #include <humidifier.h>
 #include <sensor.h>
+#include <software_timer.h>
 
 void TIMER_ISR(void *pvParameters) {
   while(1) {
@@ -18,9 +19,10 @@ void setup() {
   SCH_Add_Task(task_cooler, 0, 1);
   SCH_Add_Task(task_heater, 0, 1);
   SCH_Add_Task(task_humidifier, 0, 1);
-  SCH_Add_Task(printResult, 0, 500);
+  SCH_Add_Task(readSensor, 0, 100);
+  SCH_Add_Task(printTnH, 0, 500);
 }
 
 void loop() {
-  SCH_Dispatch_Task();
+  SCH_Dispatch_Tasks();
 }

@@ -5,10 +5,13 @@ DHT20 dht;
 float temperature=0;
 float humidity=0;
 
+#define init 0
+#define active 1
 
+int status = init;
 
 void readSensor(){
-  switch (state){
+  switch (status){
     case init:
       Serial.begin(115200);
       Wire.begin(GPIO_NUM_11, GPIO_NUM_12);
