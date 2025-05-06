@@ -43,7 +43,7 @@ void task_heater(){
             }
             
             
-            if(Is_Timer_Expired(3)==0)
+            if(Is_Timer_Expired(3)==1)
                 temp_range();
             break;
 
@@ -55,7 +55,7 @@ void task_heater(){
             }
             
             
-            if(Is_Timer_Expired(3)==0)
+            if(Is_Timer_Expired(3)==1)
                 temp_range();
             break;
 
@@ -67,7 +67,7 @@ void task_heater(){
             }
             
             
-            if(Is_Timer_Expired(3)==0)
+            if(Is_Timer_Expired(3)==1)
                 temp_range();
             break;
     }
