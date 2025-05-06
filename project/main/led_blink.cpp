@@ -14,26 +14,27 @@ void taskLedBlinky(){
     switch (led_status){
         case init:
             pinMode(led, OUTPUT);
-            led_status = LED_on;
+            Set_Timer(0, 100);
             digitalWrite(led, HIGH);
+            led_status = LED_on;
             break;
     
         case LED_on:
-            if(Is_Timer_Expired(0)==1){
-                led_status = LED_off;
+            if(Is_Timer_Expired(0)==0)
                 break;
-            }
+            
             Set_Timer(0, 100);
-            digitalWrite(led, HIGH);
+            led_status = LED_off;
+            digitalWrite(led, LOW);
             break;
     
         case LED_off:
-            if(Is_Timer_Expired(0)==1){
-                led_status = LED_off;
+            if(Is_Timer_Expired(0)==0)
                 break;
-            }
+
             Set_Timer(0, 100);
-            digitalWrite(led, LOW);
+            led_status = LED_on;
+            digitalWrite(led, HIGH);
             break;
     }
 }

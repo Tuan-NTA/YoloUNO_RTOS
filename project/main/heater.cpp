@@ -5,41 +5,70 @@
 
 
 int heater_status= init;
-bool flag = false;
+bool flag = true;
 
 void temp_range(){
-    if(temperature>18 && temperature<30)
-            heater_status=safe;
-
-    if((temperature>10 && temperature<17) ||
-        (temperature>31 && temperature<35))
-            heater_status=risky;
+    
+    if(temperature>18 && temperature<30){
+        heater_status=safe;
+    }
             
-    if(temperature<10||temperature>35)
-            heater_status=danger;
+    if((temperature>10 && temperature<17) ||
+        (temperature>31 && temperature<35)){
+            heater_status=risky;
+    }
+            
+            
+    if(temperature<10||temperature>35){
+        heater_status=danger;
+    }
+
+    flag=true;
+    Set_Timer(3,500);
 }
 
 void task_heater(){
-    if(flag)
-        temp_range();
-
     switch (heater_status){
         case init:
             pinMode(D3, OUTPUT);
             pinMode(D4, OUTPUT);
-            flag= true;
+            temp_range();
             break;
+
         case safe:
-            digitalWrite(D3,HIGH);
-            digitalWrite(D4,LOW);
+            if(flag){
+                digitalWrite(D3,HIGH);
+                digitalWrite(D4,LOW);
+                flag=false;
+            }
+            
+            
+            if(Is_Timer_Expired(3)==0)
+                temp_range();
             break;
+
         case risky:
-            digitalWrite(D3,LOW);
-            digitalWrite(D4,HIGH);
+            if(flag){
+                digitalWrite(D3,LOW);
+                digitalWrite(D4,HIGH);
+                flag=false;
+            }
+            
+            
+            if(Is_Timer_Expired(3)==0)
+                temp_range();
             break;
+
         case danger:
-            digitalWrite(D3,HIGH);
-            digitalWrite(D4,HIGH);
+            if(flag){
+                digitalWrite(D3,HIGH);
+                digitalWrite(D4,HIGH);
+                flag=false;
+            }
+            
+            
+            if(Is_Timer_Expired(3)==0)
+                temp_range();
             break;
     }
 }

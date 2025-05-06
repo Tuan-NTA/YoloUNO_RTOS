@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include "DHT20.h"
 #include "sensor.h"
+#include "software_timer.h"
 
 DHT20 dht;
 
@@ -20,7 +21,6 @@ void readSensor(){
 
     case active:
       dht.read();
-
       temperature = dht.getTemperature();
       humidity = dht.getHumidity();
 
@@ -28,9 +28,16 @@ void readSensor(){
 
       if (isnan(temperature) || isnan(humidity)) {
         Serial.println("Failed to read from DHT sensor!");
-        return;
+        break;
       }  
+      sensor_status=idle;
+      Set_Timer(1,500);
       break;
+      
+    case idle:
+      if(Is_Timer_Expired(1) == 0)
+        break;
+      sensor_status=active;
     }
 }
 
@@ -40,6 +47,6 @@ void printTnH(){
     Serial.print("%  Temperature: ");
     Serial.print(temperature);
     Serial.println("°C");
-  }
+}
   
 

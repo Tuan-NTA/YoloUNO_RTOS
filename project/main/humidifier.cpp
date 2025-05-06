@@ -17,39 +17,42 @@ void task_humidifier(){
             break;
 
         case idle:
-            if(humidity<40)
+            if(humidity<40){
+                Set_Timer(4, 500);
                 humidifier_status= active_green;
+                digitalWrite(D7, HIGH);
+                digitalWrite(D8, LOW);
+            }
+                
             break;
 
         case active_green:
-            if (Is_Timer_Expired(1) == 1){
-                humidifier_status = active_yellow;
+            if (Is_Timer_Expired(4) == 0){
                 break;
             } 
-            Set_Timer(1, 500);
-            digitalWrite(D7, HIGH);
-            digitalWrite(D8,LOW);
+            Set_Timer(4, 300);
+            humidifier_status = active_yellow;
+            digitalWrite(D7, LOW);
+            digitalWrite(D8, HIGH);
             break;
         
         case active_yellow:
-            if (Is_Timer_Expired(1) == 1){
-                humidifier_status = active_red;
+            if (Is_Timer_Expired(4) == 0){
                 break;
             } 
-            Set_Timer(1, 300);
-            digitalWrite(D7, LOW);
-            digitalWrite(D8,HIGH);
+            Set_Timer(4, 200);
+            humidifier_status = active_red;
+            digitalWrite(D7, HIGH);
+            digitalWrite(D8, HIGH);
             break;
         
         case active_red:
-            if (Is_Timer_Expired(1) == 1){
-                humidifier_status = idle;
+            if (Is_Timer_Expired(4) == 0){
                 break;
             } 
-            Set_Timer(1, 200);
-            
-            digitalWrite(D7, HIGH);
-            digitalWrite(D8,HIGH);
+            humidifier_status = idle;
+            digitalWrite(D7, LOW);
+            digitalWrite(D8, LOW);
             break;
     }
 }

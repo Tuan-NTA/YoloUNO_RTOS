@@ -24,10 +24,10 @@ void setup() {
 
   SCH_Add_Task(Timer_Run, 0, 1);
   SCH_Add_Task(taskLedBlinky, 0, 1);
-  SCH_Add_Task(readSensor, 0, 100);
-  SCH_Add_Task(task_cooler, 100, 1);
-  SCH_Add_Task(task_heater, 100, 100);
-  SCH_Add_Task(task_humidifier, 100, 1);
+  SCH_Add_Task(readSensor, 0, 1);
+  SCH_Add_Task(task_cooler, 0, 1);
+  SCH_Add_Task(task_heater, 0, 1);
+  SCH_Add_Task(task_humidifier, 0,1);
   
 }
 

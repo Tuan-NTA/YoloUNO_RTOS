@@ -6,6 +6,7 @@
 
 #define init 0
 #define active 1
+#define idle 2
 
 extern DHT20 dht;
 
